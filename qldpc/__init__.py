@@ -2,7 +2,7 @@ import importlib.metadata
 
 from . import abstract, codes, decoder, external, objects
 
-__version__ = importlib.metadata.version("qldpc")
+__version__ = "111"
 
 __all__ = [
     "__version__",

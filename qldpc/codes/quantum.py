@@ -22,7 +22,8 @@ import functools
 import itertools
 import os
 from collections.abc import Callable, Collection, Sequence
-
+from typing import Union
+import galois
 import networkx as nx
 import numpy as np
 import numpy.typing as npt
@@ -106,7 +107,7 @@ class TBCode(CSSCode):
 
 
 # map from a "sector" in {0,1,X,Z} to a 2D coordinate map (i,j) --> (a,b) represented by a 4D array
-BBCodePlaquetteMap = Callable[[int | PauliXZ], npt.NDArray[np.int_]]
+BBCodePlaquetteMap = Callable[[Union[int, PauliXZ]], npt.NDArray[np.int_]]
 
 
 # TODO: example notebook featuring this code
@@ -604,11 +605,12 @@ class HGPCode(CSSCode):
         matrix_b: npt.NDArray[np.int_ | np.object_],
     ) -> tuple[npt.NDArray[np.int_ | np.object_], npt.NDArray[np.int_ | np.object_]]:
         """Hypergraph product of two parity check matrices."""
-        # construct the nontrivial blocks of the final parity check matrices
-        mat_H1_In2 = np.kron(matrix_a, np.eye(matrix_b.shape[1], dtype=int))
-        mat_In1_H2 = np.kron(np.eye(matrix_a.shape[1], dtype=int), matrix_b)
-        mat_H1_Im2_T = np.kron(matrix_a.T, np.eye(matrix_b.shape[0], dtype=int))
-        mat_Im1_H2_T = np.kron(np.eye(matrix_a.shape[0], dtype=int), matrix_b.T)
+        # construct the nontrivial blocks of the final parity check matrices\
+        GF = galois.GF2
+        mat_H1_In2 = np.kron(matrix_a, GF(np.eye(matrix_b.shape[1], dtype=int)))
+        mat_In1_H2 = np.kron(GF(np.eye(matrix_a.shape[1], dtype=int)), matrix_b)
+        mat_H1_Im2_T = np.kron(matrix_a.T, GF(np.eye(matrix_b.shape[0], dtype=int)))
+        mat_Im1_H2_T = np.kron(GF(np.eye(matrix_a.shape[0], dtype=int)), matrix_b.T)
 
         # construct the X-sector and Z-sector parity check matrices
         matrix_x = np.block([mat_H1_In2, mat_Im1_H2_T])
